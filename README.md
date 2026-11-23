@@ -6,6 +6,10 @@ Official production-grade security audit repository for the **Datheon Applicatio
 
 This project provides an end-to-end audit lab, vulnerability proof-of-concept scripts, hardened backend authorization routes, cryptographic session controls, PII masking algorithms, and an automated CI/CD security pipeline defending against **OWASP API Security Top 10** vulnerabilities (specifically **API1:2023 Broken Object Level Authorization / IDOR**).
 
+> ### 🚀 [LAUNCH LIVE INTERACTIVE APPSEC DEMO LAB](https://jeevicyber28.github.io/Datheon_AppSec_Internship/)
+> **Interactive Live Sandbox:** [`https://jeevicyber28.github.io/Datheon_AppSec_Internship/`](https://jeevicyber28.github.io/Datheon_AppSec_Internship/)  
+> *Test live IDOR parameter attacks vs. zero-trust dual-key authorization, cryptographic token tampering, real-time PII sanitization, and sliding-window rate limiting directly inside the browser.*
+
 ---
 
 ## ⚡ Executive Task Matrix
@@ -15,7 +19,7 @@ This project provides an end-to-end audit lab, vulnerability proof-of-concept sc
 | **Task 1** | Black-Box Recon & Parameter Fuzzing | [`idor_fuzzer_poc.py`](task1_recon_idor/idor_fuzzer_poc.py), [`VULNERABILITY_DISCLOSURE_REPORT.md`](task1_recon_idor/VULNERABILITY_DISCLOSURE_REPORT.md) | **CWE-639 / BOLA**: Unauthenticated query parameter enumeration | Verified |
 | **Task 2** | Remediating BOLA in Node.js | [`hardened_route.js`](task2_bola_remediation/hardened_route.js), [`auth_middleware.js`](task2_bola_remediation/auth_middleware.js), [`REMEDIATION_PR.md`](task2_bola_remediation/REMEDIATION_PR.md) | **Zero-Trust Dual-Key Query**: Binds object ID to authenticated caller | Hardened |
 | **Task 3** | Cryptographic Session Security | [`session_crypto_service.js`](task3_session_security/session_crypto_service.js), [`sliding_rate_limiter.js`](task3_session_security/sliding_rate_limiter.js) | **XSS Mitigation**: `HttpOnly; SameSite=Lax` cookies + Sliding Window Rate Limiting | Implemented |
-| **Task 4** | PII Masking & Automated DAST | [`pii_sanitizer.js`](task4_pii_masking_ci_cd/pii_sanitizer.js), [`security_audit.yml`](.github/workflows/security_audit.yml) | **Data Sanitization & CI/CD**: Strict CSP, HSTS, and OWASP ZAP automated pipeline | Automated |
+| **Task 4** | PII Masking & Automated DAST | [`pii_sanitizer.js`](task4_pii_masking_ci_cd/pii_sanitizer.js), [`security_audit.yml`](task4_pii_masking_ci_cd/security_audit.yml) | **Data Sanitization & CI/CD**: Strict CSP, HSTS, and OWASP ZAP automated pipeline | Automated |
 
 ---
 
