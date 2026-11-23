@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datheon AppSec Lab // Live Interactive Security Audit Demo</title>
+    <style>
+        :root {
+            --bg: #0d0d0d;
+            --surface: #181818;
+            --surface-hover: #222222;
+            --yellow: #FFE600;
+            --cyan: #00F0FF;
+            --coral: #FF3366;
+            --lime: #00FF66;
+            --white: #FFFFFF;
+            --text-dim: #999999;
+            --border: 3px solid #000;
+            --shadow: 5px 5px 0px #000;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Consolas", "Courier New", monospace; }
+        body { background: var(--bg); color: var(--white); padding: 1.5rem; line-height: 1.5; }
+        .container { max-width: 1100px; margin: auto; }
+
+        /* Neo-Brutalist Top Banner */
+        .banner {
+            background: var(--yellow);
+            color: #000;
+            border: var(--border);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        .banner-tags { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+        .tag {
+            font-size: 0.75rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            padding: 0.25rem 0.6rem;
+            border: 2px solid #000;
+            box-shadow: 2px 2px 0px #000;
+        }
+        .tag-coral { background: var(--coral); color: #fff; }
+        .tag-cyan { background: var(--cyan); color: #000; }
+        .tag-lime { background: var(--lime); color: #000; }
+        .tag-dark { background: #000; color: #fff; }
+
+        .banner h1 { font-size: 2.2rem; font-weight: 900; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 0.5rem; }
+        .banner p { font-size: 1rem; font-weight: 700; color: #222; }
+        
+        .repo-link-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px dashed #000;
+        }
+        .author-tag { font-weight: 900; font-size: 0.9rem; }
+
+        /* Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .card {
+            background: var(--surface);
+            border: var(--border);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            position: relative;
+        }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .card h2 { font-size: 1.25rem; font-weight: 900; text-transform: uppercase; }
+        .card p.desc { font-size: 0.85rem; color: #bbb; margin-bottom: 1.25rem; }
+
+        /* Form elements */
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 0.4rem; color: var(--yellow); }
+        select, input[type="text"] {
+            width: 100%;
+            background: #000;
+            color: var(--white);
+            border: 2px solid #555;
+            padding: 0.6rem 0.8rem;
+            font-size: 0.9rem;
+            outline: none;
+            margin-bottom: 0.75rem;
+        }
+        select:focus, input[type="text"]:focus { border-color: var(--cyan); }
+
+        /* Neo-Brutalist Buttons */
+        .btn {
+            display: inline-block;
+            background: var(--white);
+            color: #000;
+            border: var(--border);
+            box-shadow: 3px 3px 0px #000;
+            padding: 0.6rem 1.2rem;
+            font-weight: 900;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.1s ease;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .btn:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0px #000; }
+        .btn:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0px #000; }
+        .btn-coral { background: var(--coral); color: #fff; }
+        .btn-lime { background: var(--lime); color: #000; }
+        .btn-cyan { background: var(--cyan); color: #000; }
+        .btn-yellow { background: var(--yellow); color: #000; }
+
+        /* Mode Switcher Toggle */
+        .mode-toggle {
+            display: flex;
+            border: 2px solid #000;
+            box-shadow: 3px 3px 0px #000;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        .mode-btn {
+            flex: 1;
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
+            background: #222;
+            color: #888;
+        }
+        .mode-btn.active-vuln { background: var(--coral); color: #fff; }
+        .mode-btn.active-hardened { background: var(--lime); color: #000; }
+
+        /* Terminal Console */
+        .terminal-card {
+            background: #000;
+            border: var(--border);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .terminal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .terminal-title { color: var(--yellow); font-weight: 900; font-size: 0.9rem; }
+        .status-badge { font-weight: 900; font-size: 0.8rem; padding: 0.2rem 0.6rem; border: 1px solid #555; }
+        pre#terminal-output {
+            background: #050505;
+            color: var(--lime);
+            padding: 1rem;
+            border: 1px solid #222;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            max-height: 340px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* Rate Limiter Meter */
+        .meter-container { background: #333; border: 2px solid #000; height: 24px; position: relative; margin: 0.75rem 0; }
+        .meter-fill { background: var(--lime); height: 100%; width: 0%; transition: width 0.3s ease, background 0.3s ease; }
+        .meter-label { position: absolute; width: 100%; text-align: center; font-size: 0.75rem; font-weight: 900; line-height: 24px; color: #000; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            padding-top: 1rem;
+            border-top: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Banner Header -->
+        <div class="banner">
+            <div class="banner-tags">
+                <span class="tag tag-coral">CVSS 7.5 HIGH</span>
+                <span class="tag tag-cyan">OWASP API1:2023 (BOLA)</span>
+                <span class="tag tag-lime">ZERO-TRUST AUDIT</span>
+                <span class="tag tag-dark">LIVE AUDIT LAB</span>
+            </div>
+            <h1>DATHEON APPSEC // API PENTESTING DEMO</h1>
+            <p>Interactive Exploit & Defense Laboratory: Broken Object Level Authorization, Session Cryptography, & PII Sanitization.</p>
+            <div class="repo-link-bar">
+                <span class="author-tag">AUTHOR: JEEVIRAJ V (ANNA UNIVERSITY) // DATHEON BATCH 01</span>
+                <a href="https://github.com/jeevicyber28/Datheon_AppSec_Internship" target="_blank" class="btn btn-dark">View Source on GitHub →</a>
+            </div>
+        </div>
+
+        <!-- Interactive Grid -->
+        <div class="grid">
+            <!-- 1. BOLA / IDOR Interactive Lab -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>1. BOLA / IDOR Simulator</h2>
+                    <span class="tag tag-coral" id="mode-indicator">VULNERABLE</span>
+                </div>
+                <p class="desc">Toggle between legacy unauthenticated querying and the hardened zero-trust dual-filter authorization guard.</p>
+
+                <div class="mode-toggle">
+                    <div class="mode-btn active-vuln" id="btn-vuln-mode" onclick="setMode('vuln')">Vulnerable (IDOR Active)</div>
+                    <div class="mode-btn" id="btn-hard-mode" onclick="setMode('hardened')">Hardened (Zero-Trust)</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Target Candidate ID:</label>
+                    <select id="target-id-select">
+                        <option value="DT-2026-001">DT-2026-001 (User A: Jeeviraj V)</option>
+                        <option value="DT-2026-002" selected>DT-2026-002 (User B: Priya Ramanathan)</option>
+                        <option value="DT-2026-003">DT-2026-003 (User C: Arun Kumar)</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-coral" id="exec-idor-btn" onclick="executeIDORTest()">Execute HTTP Probe</button>
+            </div>
+
+            <!-- 2. Cryptographic Session Playground -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>2. Session Security (JWT & Cookies)</h2>
+                    <span class="tag tag-cyan">HMAC-SHA256</span>
+                </div>
+                <p class="desc">Inspect cryptographically signed JWT claims, HttpOnly cookie flags, and simulate signature tampering attacks.</p>
+
+                <button class="btn btn-cyan" onclick="generateSessionToken()">Issue Valid Session JWT</button>
+                <button class="btn btn-yellow" onclick="simulateTampering()">Simulate Signature Tampering</button>
+
+                <div style="margin-top: 1rem;">
+                    <label>Cookie Flags Enforced:</label>
+                    <div style="font-size: 0.8rem; background: #000; padding: 0.5rem; border: 1px solid #333;">
+                        <code>Set-Cookie: session_token=...; HttpOnly; Secure; SameSite=Lax; Path=/</code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Live PII Masking Engine -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>3. Dynamic PII Masking</h2>
+                    <span class="tag tag-lime">Zero-Leakage</span>
+                </div>
+                <p class="desc">Public verification endpoints scrub internal metadata and mask PII in real time.</p>
+
+                <div class="form-group">
+                    <label>Type an Email Address:</label>
+                    <input type="text" id="email-input" value="jeevicyber28@gmail.com" oninput="updateMasking()">
+                </div>
+                <div class="form-group">
+                    <label>Type a Phone Number:</label>
+                    <input type="text" id="phone-input" value="+91-98401-23456" oninput="updateMasking()">
+                </div>
+                <div style="background: #000; padding: 0.75rem; border: 1px solid #333; font-size: 0.85rem;">
+                    <div><strong>Masked Email:</strong> <span style="color: var(--lime);" id="masked-email">j***8@gmail.com</span></div>
+                    <div><strong>Masked Phone:</strong> <span style="color: var(--cyan);" id="masked-phone">+**-*****-3456</span></div>
+                </div>
+            </div>
+
+            <!-- 4. Sliding Window Rate Limiter -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>4. Sliding Rate Limiter</h2>
+                    <span class="tag tag-yellow">Brute-Force Guard</span>
+                </div>
+                <p class="desc">Throttles automated enumeration fuzzing bursts (Limit: 6 requests per 30-second sliding window).</p>
+
+                <div class="meter-container">
+                    <div class="meter-fill" id="rate-meter"></div>
+                    <div class="meter-label" id="rate-label">0 / 6 REQUESTS USED</div>
+                </div>
+
+                <button class="btn btn-yellow" onclick="triggerRateLimitProbe()">Send Rapid Request</button>
+                <button class="btn btn-white" onclick="resetRateLimiter()">Reset Window</button>
+            </div>
+        </div>
+
+        <!-- Terminal Output -->
+        <div class="terminal-card">
+            <div class="terminal-header">
+                <span class="terminal-title">● LIVE HTTP AUDIT TELEMETRY LOG</span>
+                <span class="status-badge" id="terminal-status" style="color: var(--lime);">STATUS: READY</span>
+            </div>
+            <pre id="terminal-output">// Datheon AppSec Interactive Lab initialized.
+// Click any test action above to inspect live request/response payloads...</pre>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            Datheon Application Security & API Pentesting Internship · Developed by Jeeviraj V · MIT Open Source License
+        </footer>
+    </div>
+
+    <!-- Interactive Client-Side Engine -->
+    <script>
+        // Mock Database of Candidates
+        const mockDatabase = {
+            "DT-2026-001": {
+                applicationId: "DT-2026-001",
+                candidateName: "Jeeviraj V",
+                email: "jeevicyber28@gmail.com",
+                phone: "+91-98401-23456",
+                institution: "Anna University",
+                internshipTrack: "AppSec & API Pentesting",
+                offerStatus: "Confirmed",
+                mentorNotes: "CONFIDENTIAL: Cleared AppSec entrance test with top 1% score."
+            },
+            "DT-2026-002": {
+                applicationId: "DT-2026-002",
+                candidateName: "Priya Ramanathan",
+                email: "priya.ramanathan@example.com",
+                phone: "+91-98402-88888",
+                institution: "Anna University",
+                internshipTrack: "Python Programming",
+                offerStatus: "Confirmed",
+                mentorNotes: "CONFIDENTIAL: Placed in Batch 01."
+            },
+            "DT-2026-003": {
+                applicationId: "DT-2026-003",
+                candidateName: "Arun Kumar",
+                email: "arun.k@example.com",
+                phone: "+91-98403-99999",
+                institution: "Anna University",
+                internshipTrack: "Cloud Architecture",
+                offerStatus: "Pending Review",
+                mentorNotes: "CONFIDENTIAL: Awaiting transcript verification."
+            }
+        };
+
+        let currentMode = 'vuln'; // 'vuln' or 'hardened'
+
+        function setMode(mode) {
+            currentMode = mode;
+            const btnVuln = document.getElementById('btn-vuln-mode');
+            const btnHard = document.getElementById('btn-hard-mode');
+            const ind = document.getElementById('mode-indicator');
+            const execBtn = document.getElementById('exec-idor-btn');
+
+            if (mode === 'vuln') {
+                btnVuln.className = 'mode-btn active-vuln';
+                btnHard.className = 'mode-btn';
+                ind.className = 'tag tag-coral';
+                ind.textContent = 'VULNERABLE';
+                execBtn.className = 'btn btn-coral';
+            } else {
+                btnVuln.className = 'mode-btn';
+                btnHard.className = 'mode-btn active-hardened';
+                ind.className = 'tag tag-lime';
+                ind.textContent = 'HARDENED';
+                execBtn.className = 'btn btn-lime';
+            }
+        }
+
+        function logToTerminal(statusText, isError, outputText) {
+            const out = document.getElementById('terminal-output');
+            const stat = document.getElementById('terminal-status');
+            stat.textContent = statusText;
+            stat.style.color = isError ? "var(--coral)" : "var(--lime)";
+            out.textContent = outputText;
+        }
+
+        // 1. Task 1 & 2 Execution
+        function executeIDORTest() {
+            const targetId = document.getElementById('target-id-select').value;
+            const record = mockDatabase[targetId];
+
+            if (currentMode === 'vuln') {
+                // VULNERABLE: Direct single-parameter lookup leaking raw PII
+                const responseHeaders = {
+                    "HTTP/1.1": "200 OK",
+                    "Content-Type": "application/json; charset=utf-8",
+                    "X-Vulnerability-Notice": "CWE-639 BOLA / IDOR Active (Zero Session Check)",
+                    "Access-Control-Allow-Origin": "*"
+                };
+
+                const logMessage = 
+`>>> GET /api/v1/applications/${targetId} (Zero Authentication Headers)
+[!] CRITICAL IDOR EXPLOIT SUCCESSFUL [HTTP 200 OK]
+----------------------------------------------------------------------
+${JSON.stringify(responseHeaders, null, 2)}
+
+${JSON.stringify(record, null, 2)}
+
+[!] EXPLOIT EVIDENCE: Full confidential record leaked without credentials!
+    Target: ${record.candidateName} | Email: ${record.email} | Phone: ${record.phone}
+    CVSS 3.1 Severity Rating: 7.5 HIGH (AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N)`;
+
+                logToTerminal("HTTP 200 VULNERABLE LEAK", true, logMessage);
+            } else {
+                // HARDENED: Dual-filter ownership guard
+                const responseHeaders = {
+                    "HTTP/1.1": "401 Unauthorized",
+                    "Content-Type": "application/json; charset=utf-8",
+                    "WWW-Authenticate": "Bearer realm='Datheon AppSec Guard'",
+                    "X-Zero-Trust-Policy": "Dual-Key Ownership Enforced"
+                };
+
+                const responseBody = {
+                    success: false,
+                    error: "Authentication required",
+                    code: "ERR_UNAUTHENTICATED",
+                    message: "Authorization guard rejected unauthenticated access. Dual-key ownership binding failed."
+                };
+
+                const logMessage = 
+`>>> GET /api/v1/hardened/applications/${targetId} (No Session Bearer Token)
+[+] ZERO-TRUST DEFENSE TRIGGERED [HTTP 401 UNAUTHORIZED]
+----------------------------------------------------------------------
+${JSON.stringify(responseHeaders, null, 2)}
+
+${JSON.stringify(responseBody, null, 2)}
+
+[+] REMEDIATION VERIFIED:
+    1. Unauthenticated request rejected at middleware boundary.
+    2. Cross-tenant horizontal privilege escalation blocked.
+    3. Zero internal PII or database schema disclosure.`;
+
+                logToTerminal("HTTP 401 PROTECTED", false, logMessage);
+            }
+        }
+
+        // 2. Task 3 Cryptographic Session
+        function generateSessionToken() {
+            const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
+            const payload = btoa(JSON.stringify({
+                userId: "USR-001",
+                email: "jeevicyber28@gmail.com",
+                role: "CANDIDATE",
+                iat: Math.floor(Date.now() / 1000),
+                exp: Math.floor(Date.now() / 1000) + 900
+            }));
+            const mockSig = "8f3b92dc18148a1d65dfc2d4b1fa3d67";
+            const token = `${header}.${payload}.${mockSig}`;
+
+            const logMessage = 
+`>>> POST /api/v1/auth/login (Verified Credentials)
+[+] AUTHENTICATED SUCCESSFULLY [HTTP 200 OK]
+----------------------------------------------------------------------
+Set-Cookie: session_token=${token}; Max-Age=900; Path=/; HttpOnly; SameSite=Lax; Secure
+
+Decoded JWT Header:
+${JSON.stringify({ alg: "HS256", typ: "JWT" }, null, 2)}
+
+Decoded Verified Payload:
+${JSON.stringify({
+    userId: "USR-001",
+    email: "jeevicyber28@gmail.com",
+    role: "CANDIDATE",
+    expiresIn: "15 minutes"
+}, null, 2)}
+
+[+] SECURITY BARRIER:
+    1. Token placed in HttpOnly cookie; JavaScript 'document.cookie' CANNOT read it.
+    2. SameSite=Lax prevents cross-site CSRF attacks.`;
+
+            logToTerminal("HTTP 200 SECURE COOKIE SET", false, logMessage);
+        }
+
+        function simulateTampering() {
+            const logMessage = 
+`>>> GET /api/v1/session/protected (Tampered Signature Injected)
+[!] CRYPTOGRAPHIC TAMPER DETECTION TRIGGERED [HTTP 401 UNAUTHORIZED]
+----------------------------------------------------------------------
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{
+  "success": false,
+  "error": "Invalid or tampered session token",
+  "code": "ERR_SIGNATURE_MISMATCH",
+  "message": "HMAC-SHA256 signature verification failed. Token bytes modified in transit."
+}
+
+[+] TAMPER REJECTED: Constant-time comparison 'crypto.timingSafeEqual' verified signature failure.`;
+
+            logToTerminal("HTTP 401 TAMPER BLOCKED", true, logMessage);
+        }
+
+        // 3. Task 4 PII Masking
+        function maskEmail(email) {
+            if (!email || !email.includes('@')) return "m***d@domain.com";
+            const [u, d] = email.split('@');
+            if (u.length <= 2) return `${u[0]}*@${d}`;
+            return `${u[0]}***${u[u.length - 1]}@${d}`;
+        }
+        function maskPhone(phone) {
+            if (!phone) return "+**-*****-****";
+            const clean = phone.trim();
+            const last4 = clean.slice(-4);
+            return `+**-*****-${last4}`;
+        }
+
+        function updateMasking() {
+            const em = document.getElementById('email-input').value;
+            const ph = document.getElementById('phone-input').value;
+            document.getElementById('masked-email').textContent = maskEmail(em);
+            document.getElementById('masked-phone').textContent = maskPhone(ph);
+        }
+
+        // 4. Rate Limiting Simulation
+        let requestCount = 0;
+        const maxRequests = 6;
+        function triggerRateLimitProbe() {
+            requestCount++;
+            const meter = document.getElementById('rate-meter');
+            const label = document.getElementById('rate-label');
+            const pct = Math.min(100, (requestCount / maxRequests) * 100);
+            meter.style.width = pct + "%";
+
+            if (requestCount <= maxRequests) {
+                meter.style.background = requestCount > 4 ? "var(--yellow)" : "var(--lime)";
+                label.textContent = `${requestCount} / ${maxRequests} REQUESTS USED`;
+                label.style.color = "#000";
+
+                const logMessage = 
+`>>> GET /api/v1/search?query=candidate [Request ${requestCount}/${maxRequests}]
+[+] HTTP 200 OK (Allowed by Sliding Window Rate Limiter)
+Headers:
+  X-RateLimit-Limit: ${maxRequests}
+  X-RateLimit-Remaining: ${maxRequests - requestCount}
+  X-RateLimit-Reset: 30s`;
+                logToTerminal(`HTTP 200 OK (${requestCount}/${maxRequests})`, false, logMessage);
+            } else {
+                meter.style.background = "var(--coral)";
+                label.textContent = `RATE LIMIT EXCEEDED!`;
+                label.style.color = "#fff";
+
+                const logMessage = 
+`>>> GET /api/v1/search?query=candidate [Request ${requestCount}/${maxRequests}]
+[!] HTTP 429 TOO MANY REQUESTS (Rate Limit Breached)
+----------------------------------------------------------------------
+Headers:
+  X-RateLimit-Limit: ${maxRequests}
+  X-RateLimit-Remaining: 0
+  Retry-After: 30
+
+{
+  "success": false,
+  "error": "Too Many Requests",
+  "code": "ERR_RATE_LIMIT_EXCEEDED",
+  "message": "Automated parameter fuzzing threshold exceeded. Retry in 30 seconds."
+}
+
+[!] DEFENSE TRIGGERED: Automated brute-force parameter enumeration throttled.`;
+                logToTerminal("HTTP 429 THROTTLED", true, logMessage);
+            }
+        }
+
+        function resetRateLimiter() {
+            requestCount = 0;
+            document.getElementById('rate-meter').style.width = "0%";
+            document.getElementById('rate-label').textContent = "0 / 6 REQUESTS USED";
+            document.getElementById('rate-label').style.color = "#000";
+            logToTerminal("STATUS: WINDOW RESET", false, "// Rate limiter window reset to 0 requests.");
+        }
+    </script>
+</body>
+</html>
