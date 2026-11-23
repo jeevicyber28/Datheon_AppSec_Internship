@@ -8,6 +8,7 @@ This project provides an end-to-end audit lab, vulnerability proof-of-concept sc
 
 > ### 🚀 [LAUNCH LIVE INTERACTIVE APPSEC DEMO LAB](https://jeevicyber28.github.io/Datheon_AppSec_Internship/)
 > **Interactive Live Sandbox:** [`https://jeevicyber28.github.io/Datheon_AppSec_Internship/`](https://jeevicyber28.github.io/Datheon_AppSec_Internship/)  
+> **🎬 Project Walkthrough Video:** [`docs/demo_walkthrough.mp4`](docs/demo_walkthrough.mp4)  
 > *Test live IDOR parameter attacks vs. zero-trust dual-key authorization, cryptographic token tampering, real-time PII sanitization, and sliding-window rate limiting directly inside the browser.*
 
 ---
