@@ -1,0 +1,25 @@
+{
+  "name": "datheon-appsec-internship",
+  "version": "1.0.0",
+  "description": "Datheon Application Security & API Pentesting Internship - BOLA/IDOR Defense, Session Security, and DAST Pipeline",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node task2_bola_remediation/test_bola_remediation.js && node task3_session_security/test_session_security.js && node task4_pii_masking_ci_cd/test_pii_masking.js",
+    "test:task2": "node task2_bola_remediation/test_bola_remediation.js",
+    "test:task3": "node task3_session_security/test_session_security.js",
+    "test:task4": "node task4_pii_masking_ci_cd/test_pii_masking.js"
+  },
+  "keywords": [
+    "appsec",
+    "api-pentesting",
+    "owasp-api-top-10",
+    "idor",
+    "bola",
+    "cybersecurity",
+    "zero-trust",
+    "dast"
+  ],
+  "author": "Jeeviraj V",
+  "license": "MIT"
+}

@@ -1,0 +1,58 @@
+name: "AppSec CI/CD: Automated DAST & Vulnerability Audit"
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  security-audit:
+    name: "SAST & DAST Automated Pipeline"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout Source Code"
+        uses: actions/checkout@v4
+
+      - name: "Set up Node.js Environment"
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: "Install Project Dependencies"
+        run: |
+          npm ci || npm install --no-audit
+
+      - name: "Run Automated Unit & Security Test Suites"
+        run: |
+          node task2_bola_remediation/test_bola_remediation.js
+          node task3_session_security/test_session_security.js
+          node task4_pii_masking_ci_cd/test_pii_masking.js
+
+      - name: "Audit Security Dependencies (NPM Audit)"
+        run: |
+          npm audit --audit-level=high || true
+
+      - name: "Secrets & Token Exfiltration Scanner"
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: "Start Local AppSec Lab Server for DAST Scan"
+        run: |
+          node server.js &
+          sleep 3
+
+      - name: "DAST: OWASP ZAP Baseline Security Scan"
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: "http://localhost:5000/api/v1/public/verify/DT-2026-001"
+          rules_file_name: ".zap/rules.tsv"
+          cmd_options: "-a"
+        continue-on-error: true
